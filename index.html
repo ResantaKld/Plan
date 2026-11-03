@@ -32,6 +32,8 @@
   .legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted);margin-top:var(--sp-2)}
   .legend span{display:inline-flex;align-items:center;gap:6px}
   .legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+  .donut-title{font-weight:600;color:var(--muted);font-size:13.5px;margin-bottom:6px}
+  #bars{margin-top:var(--sp-3)}
   table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
   th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
   thead th{position:sticky;top:0;background:var(--surface);font-size:12.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;border-bottom:2px solid var(--accent);z-index:2}
@@ -80,11 +82,17 @@
       <h2>Доли клиентов в выручке</h2>
       <div class="grid2">
         <div>
+          <div class="donut-title">База: факт 11.2025</div>
           <div id="donut"></div>
           <div class="legend" id="donut-legend"></div>
         </div>
-        <div id="bars"></div>
+        <div>
+          <div class="donut-title">Факт 11.2026 — выполнено <span id="exec-title"></span></div>
+          <div id="donut-fact"></div>
+          <div class="legend" id="donut-fact-legend"></div>
+        </div>
       </div>
+      <div id="bars"></div>
     </div>
     <div class="panel">
       <h2>Все клиенты — выручка и доля</h2>
@@ -191,6 +199,28 @@ function showTab(name){
   document.getElementById("btn-plan").setAttribute("aria-selected", name==="plan");
 }
 
+/* Отрисовка кольцевой диаграммы и её легенды; centerSub — подпись в центре */
+function renderDonut(svgId, legendId, segs, total, centerLabel, centerValue, centerSub){
+  var R=70,C=2*Math.PI,acc=0,svg='<svg viewBox="0 0 180 180" width="300" role="img" aria-label="Кольцевая диаграмма">';
+  svg += '<circle cx="90" cy="90" r="'+R+'" fill="none" stroke="#e8eef7" stroke-width="26"/>';
+  segs.forEach(function(s){
+    var frac=s.v/total, dash=(frac*C).toFixed(2), off=(C/4 - acc*C).toFixed(2);
+    svg += '<circle cx="90" cy="90" r="'+R+'" fill="none" stroke="'+s.col+'" stroke-width="26" stroke-dasharray="'+dash+' '+(C-dash).toFixed(2)+'" stroke-dashoffset="'+off+'"><title>'+s.n+': '+pctStr(frac)+'</title></circle>';
+    acc += frac;
+  });
+  svg += '<text x="90" y="82" text-anchor="middle" font-size="10.5" fill="#5d6675">'+centerLabel+'</text>';
+  svg += '<text x="90" y="98" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1d2433">'+centerValue+'</text>';
+  if(centerSub) svg += '<text x="90" y="112" text-anchor="middle" font-size="10.5" font-weight="600" fill="#1d7a3e">'+centerSub+'</text>';
+  svg += '</svg>';
+  document.getElementById(svgId).innerHTML = svg;
+
+  var lg = "";
+  segs.forEach(function(s){
+    lg += '<span><i style="background:'+s.col+'"></i>'+s.n+' — '+pctStr(s.v/total)+'</span>';
+  });
+  document.getElementById(legendId).innerHTML = lg;
+}
+
 /* ===== Вкладка «Доли клиентов» ===== */
 function buildDoli(){
   var tb = document.querySelector("#t-doli tbody");
@@ -202,28 +232,24 @@ function buildDoli(){
   tb.innerHTML = html;
   document.getElementById("doli-total").textContent = fmt(total25);
 
-  /* Кольцевая диаграмма: топ-10 + «Прочие» */
+  /* Кольцевая диаграмма «Итого»: база 2025, топ-10 + «Прочие» */
   var top = base.slice(0,TOP);
   var other = total25 - top.reduce(function(s,c){return s+c[1];},0);
   var segs = top.map(function(c,i){return {n:c[0],v:c[1],col:PALETTE[i]};});
   segs.push({n:"Прочие ("+(base.length-TOP)+" клиент.)",v:other,col:PALETTE[TOP]});
+  renderDonut("donut","donut-legend",segs,total25,"Итого",fmtShort(total25)+" ₽",null);
 
-  var R=70,C=2*Math.PI,acc=0,svg='<svg viewBox="0 0 180 180" width="300" role="img" aria-label="Кольцевая диаграмма долей клиентов">';
-  svg += '<circle cx="90" cy="90" r="'+R+'" fill="none" stroke="#e8eef7" stroke-width="26"/>';
-  segs.forEach(function(s){
-    var frac=s.v/total25, dash=(frac*C).toFixed(2), off=(C/4 - acc*C).toFixed(2);
-    svg += '<circle cx="90" cy="90" r="'+R+'" fill="none" stroke="'+s.col+'" stroke-width="26" stroke-dasharray="'+dash+' '+(C-dash).toFixed(2)+'" stroke-dashoffset="'+off+'"><title>'+s.n+': '+pctStr(frac)+'</title></circle>';
-    acc += frac;
-  });
-  svg += '<text x="90" y="86" text-anchor="middle" font-size="11" fill="#5d6675">Итого</text>';
-  svg += '<text x="90" y="102" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1d2433">'+fmtShort(total25)+' ₽</text></svg>';
-  document.getElementById("donut").innerHTML = svg;
-
-  var lg = "";
-  segs.forEach(function(s){
-    lg += '<span><i style="background:'+s.col+'"></i>'+s.n+' — '+pctStr(s.v/total25)+'</span>';
-  });
-  document.getElementById("donut-legend").innerHTML = lg;
+  /* Кольцевая диаграмма «Факт»: доли факта 11.2026 + выполнение плана */
+  var fAll = CLIENTS.filter(function(c){return c[2]>0;}).sort(function(a,b){return b[2]-a[2];});
+  var fTop = fAll.slice(0,TOP), fRest = fAll.slice(TOP);
+  var total26 = fAll.reduce(function(s,c){return s+c[2];},0);
+  var planTotal = total25*GROWTH;
+  var fsegs = fTop.map(function(c,i){return {n:c[0],v:c[2],col:PALETTE[i]};});
+  if(fRest.length>0){
+    fsegs.push({n:"Прочие ("+fRest.length+" клиент.)",v:fRest.reduce(function(s,c){return s+c[2];},0),col:PALETTE[TOP]});
+  }
+  renderDonut("donut-fact","donut-fact-legend",fsegs,total26,"Выполнено",fmtShort(total26)+" ₽",pctStr(total26/planTotal)+" плана");
+  document.getElementById("exec-title").textContent = pctStr(total26/planTotal)+" плана";
 
   /* Горизонтальные бары по всем клиентам */
   var bh = "";
