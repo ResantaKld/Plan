@@ -1,0 +1,40 @@
+name: Update dashboard from Yandex Disk
+
+on:
+  schedule:
+    - cron: '0 8 * * *'   # 08:00 UTC = 10:00 по Калининграду
+  workflow_dispatch:      # ручной запуск: Actions → Update dashboard from Yandex Disk → Run workflow
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download index.html from Yandex Disk
+        shell: bash
+        run: |
+          URL="${DISK_URL:-https://yadi.sk/d/GQn5fpGb06Cjcw}"
+          ENCODED=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1], safe=''))" "$URL")
+          HREF=$(curl -sf "https://cloud-api.yandex.net/v1/disk/public/resources/download?public_key=$ENCODED" | python3 -c "import json,sys; print(json.load(sys.stdin)['href'])")
+          curl -sfL -o index.html "$HREF"
+          echo "Downloaded $(wc -c < index.html) bytes from $URL"
+        env:
+          DISK_URL: ${{ vars.DISK_URL }}
+
+      - name: Commit if changed
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if git diff --cached --quiet; then
+            echo "No changes — nothing to commit"
+          else
+            git commit -m "Автообновление дашборда с Яндекс Диска ($(date -u +%Y-%m-%d))"
+            git push
+          fi
