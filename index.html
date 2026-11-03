@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Планирование продаж — ноябрь 2026</title>
+<style>
+  :root{
+    --bg:#f3f5f9; --surface:#ffffff; --text:#1d2433; --muted:#5d6675;
+    --accent:#1f4e79; --accent-soft:#e8eef7; --line:#dfe4ec; --ok:#1d7a3e;
+    --sp-1:6px; --sp-2:12px; --sp-3:20px; --sp-4:32px; --sp-5:48px;
+    --content:1180px; --radius:12px;
+    --font-main:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    --font-mono:Consolas,"Courier New",monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-main);font-size:15px;line-height:1.5}
+  header{background:var(--accent);color:#fff;padding:var(--sp-4) var(--sp-3)}
+  .wrap{max-width:var(--content);margin:0 auto;padding:0 var(--sp-2)}
+  header h1{margin:0;font-size:clamp(20px,3.4vw,28px);letter-spacing:.2px}
+  header p{margin:var(--sp-1) 0 0;color:#cfe0f2;font-size:13.5px}
+  nav{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+  nav .wrap{display:flex;gap:var(--sp-1);flex-wrap:wrap}
+  .tab-btn{appearance:none;border:none;background:none;padding:var(--sp-2) var(--sp-3);font:inherit;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent}
+  .tab-btn[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+  .tab-btn:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+  main{padding:var(--sp-4) 0 var(--sp-5)}
+  h2{font-size:18px;margin:0 0 var(--sp-2)}
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:var(--sp-3);margin-bottom:var(--sp-3)}
+  .grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--sp-3)}
+  .charts svg{display:block;max-width:100%;height:auto}
+  .legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted);margin-top:var(--sp-2)}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+  table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+  th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+  thead th{position:sticky;top:0;background:var(--surface);font-size:12.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;border-bottom:2px solid var(--accent);z-index:2}
+  tbody tr:hover{background:var(--accent-soft)}
+  .num{text-align:right;white-space:nowrap}
+  tfoot td{font-weight:700;border-top:2px solid var(--accent);border-bottom:none;background:var(--accent-soft)}
+  .bar-row{display:grid;grid-template-columns:220px 1fr 110px;gap:8px;align-items:center;padding:2px 0;font-size:13.5px}
+  .bar-track{background:var(--accent-soft);border-radius:6px;height:16px;overflow:hidden}
+  .bar-fill{height:100%;background:var(--accent-2,#2e75b6);border-radius:6px}
+  input.fact{width:130px;padding:5px 8px;border:1px solid var(--line);border-radius:7px;font:inherit;font-variant-numeric:tabular-nums;text-align:right;background:#fbfcff}
+  input.fact:focus{outline:2px solid var(--accent);outline-offset:-1px}
+  .pct{font-weight:600}
+  .search{margin-bottom:var(--sp-2)}
+  .search input{width:min(320px,100%);padding:8px 12px;border:1px solid var(--line);border-radius:8px;font:inherit}
+  .search input:focus{outline:2px solid var(--accent);outline-offset:-1px}
+  .note{color:var(--muted);font-size:13px;margin:var(--sp-2) 0}
+  footer{border-top:1px solid var(--line);background:var(--surface);padding:var(--sp-3) 0;color:var(--muted);font-size:12.5px}
+  section[hidden]{display:none}
+  @media (max-width:900px){.grid2{grid-template-columns:1fr}.bar-row{grid-template-columns:130px 1fr 90px}}
+  @media print{
+    nav,.search,.bar-row .bar-track{display:none}
+    body{background:#fff}
+    section[hidden]{display:block}
+    .panel{break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>Планирование продаж — ноябрь 2026</h1>
+    <p>Менеджер: Щудро М.А. · База: факт ноября 2025 (выгрузка 1С, 01.11–30.11.2025) · План = факт × 1,3</p>
+  </div>
+</header>
+
+<nav aria-label="Вкладки">
+  <div class="wrap">
+    <button class="tab-btn" id="btn-doli" aria-selected="true" onclick="showTab('doli')">Доли клиентов</button>
+    <button class="tab-btn" id="btn-plan" aria-selected="false" onclick="showTab('plan')">План Ноябрь 2026</button>
+  </div>
+</nav>
+
+<main class="wrap">
+  <section id="tab-doli" aria-labelledby="btn-doli">
+    <div class="panel charts">
+      <h2>Доли клиентов в выручке</h2>
+      <div class="grid2">
+        <div>
+          <div id="donut"></div>
+          <div class="legend" id="donut-legend"></div>
+        </div>
+        <div id="bars"></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>Все клиенты — выручка и доля</h2>
+      <div class="note">Доля = выручка клиента / итог всей базы менеджера.</div>
+      <table id="t-doli">
+        <thead><tr><th scope="col">Клиент</th><th scope="col" class="num">Выручка, ₽</th><th scope="col" class="num">Доля, %</th></tr></thead>
+        <tbody></tbody>
+        <tfoot><tr><td>ИТОГО</td><td class="num" id="doli-total"></td><td class="num" id="doli-total-pct">100,00%</td></tr></tfoot>
+      </table>
+    </div>
+  </section>
+
+  <section id="tab-plan" hidden aria-labelledby="btn-plan">
+    <div class="panel">
+      <h2>План и факт по клиентам</h2>
+      <p class="note">План = факт ноября 2025 × 1,3 (+30% к каждому клиенту). Колонку «Факт 11.2026» пока заполняйте вручную — значения сохраняются в браузере (localStorage). Когда пришлёте данные за ноябрь 2026, подключим автоподтяжку и условия подсветки выполнения.</p>
+      <div class="search"><input type="search" id="plan-search" placeholder="Поиск по клиенту…" aria-label="Поиск по клиенту"></div>
+      <table id="t-plan">
+        <thead><tr>
+          <th scope="col">№</th><th scope="col">Клиент</th><th scope="col" class="num">Факт 11.2025, ₽</th>
+          <th scope="col" class="num">План 11.2026 (+30%), ₽</th><th scope="col" class="num">Факт 11.2026, ₽</th>
+          <th scope="col" class="num">% выполнения</th><th scope="col" class="num">Отклонение, ₽</th>
+        </tr></thead>
+        <tbody></tbody>
+        <tfoot><tr>
+          <td></td><td>ИТОГО</td><td class="num" id="p-f25"></td><td class="num" id="p-plan"></td>
+          <td class="num" id="p-f26"></td><td class="num pct" id="p-exec"></td><td class="num" id="p-dev"></td>
+        </tr></tfoot>
+      </table>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    Источник данных: выгрузка 1С «Валовая прибыль предприятия», период 01.11.2025–30.11.2025, отбор «Подразделение в группе из списка "Калининград"», основной менеджер — Щудро М.А. В базу включены 41 контрагент менеджера; клиенты других менеджеров выгрузки не включены.
+  </div>
+</footer>
+
+<script>
+"use strict";
+/* ===== Данные: факт ноября 2025, менеджер Щудро (выгрузка 1С) ===== */
+var CLIENTS = [
+ ["ООО «Клинкербуд»",1938081.80],
+ ["ИП Вальков Александр Николаевич",958149.07],
+ ["ООО «Бауцентр Рус»",864938.06],
+ ["ООО «ПрофСтайл»",655241.07],
+ ["ООО «ИД Строй»",402716.12],
+ ["ИП Голощапов Евгений Иванович",368685.13],
+ ["ИП Козлова Надежда Владимировна",248237.67],
+ ["ИП Лузянин Герман Валентинович",211701.57],
+ ["ИП Высоцкий Алексей Сергеевич",124495.36],
+ ["ООО «АгроРегион»",95864.63],
+ ["ООО «Новые окна»",74315.44],
+ ["ИП Белавин Роман Геннадьевич",57849.40],
+ ["ИП Азарян Лусине Ромаевна",56479.04],
+ ["ИП Кузнецов Леонид Евгеньевич",55834.91],
+ ["ИП Афонский Николай Витальевич",55529.92],
+ ["ИП Светлейцих Игорь Владимирович",52245.33],
+ ["ИП Вайткене Юлия Юрьевна",45113.19],
+ ["ООО «КАУФ МАРКЕТ»",43858.62],
+ ["ООО «Техэлектроцентр»",43243.69],
+ ["ИП Ефрейторова Валентина Анатольевна",40163.22],
+ ["ИП Евдокимов Евгений Игоревич",37306.63],
+ ["ИП Юдичева Наталья Степановна",35042.08],
+ ["ИП Абуладзе Зебури Автандилович",34510.60],
+ ["ИП Чурсина Виктория Юрьевна",34151.37],
+ ["ИП Донченко Сергей Анатольевич",29661.24],
+ ["ИП Бауэр Даниэль Александрович",24271.54],
+ ["ИП Горева Галина Витальевна",23193.69],
+ ["ИП Мудраков Игорь Степанович",22794.32],
+ ["ООО «Проф-Инжиниринг»",19687.41],
+ ["ООО «Евразия»",18550.54],
+ ["ИП Марчук Святослав Владимирович",17612.97],
+ ["ИП Баловнева Татьяна Анатольевна",17044.87],
+ ["ИП Попов Алексей Владимирович",16228.20],
+ ["ИП Фомина Снежана Николаевна",14207.56],
+ ["ИП Готовка Виталий Рышардович",13910.74],
+ ["ИП Бурганшин Егор Ильдусович",13666.24],
+ ["ИП Гущин Олег Васильевич",13170.53],
+ ["ООО «Маяк Плюс»",9025.66],
+ ["ИП Писаренко Александр Юрьевич",7472.92],
+ ["ИП Трошин Андрей Владимирович",4896.78],
+ ["ООО «ФЭКТОРИ»",3269.68]
+];
+var GROWTH = 1.3, TOP = 10;
+var LS_KEY = "plan_nov2026_fact_v1";
+
+var PALETTE = ["#1f4e79","#2e75b6","#5b9bd5","#8faadc","#c9a227","#a8734b","#4d8b6f","#7c5aa0","#c05b5b","#5f7d95","#a0a8b4"];
+var total25 = CLIENTS.reduce(function(s,c){return s+c[1];},0);
+var max25 = CLIENTS[0][1];
+
+function fmt(v){ return new Intl.NumberFormat("ru-RU",{minimumFractionDigits:2,maximumFractionDigits:2}).format(v); }
+function fmtShort(v){ return new Intl.NumberFormat("ru-RU",{maximumFractionDigits:0}).format(v); }
+function pctStr(v){ return (v*100).toLocaleString("ru-RU",{minimumFractionDigits:2,maximumFractionDigits:2})+"%"; }
+
+/* ===== Вкладки ===== */
+function showTab(name){
+  document.getElementById("tab-doli").hidden = name!=="doli";
+  document.getElementById("tab-plan").hidden = name!=="plan";
+  document.getElementById("btn-doli").setAttribute("aria-selected", name==="doli");
+  document.getElementById("btn-plan").setAttribute("aria-selected", name==="plan");
+}
+
+/* ===== Вкладка «Доли клиентов» ===== */
+function buildDoli(){
+  var tb = document.querySelector("#t-doli tbody");
+  var html = "";
+  CLIENTS.forEach(function(c){
+    html += "<tr><td>"+c[0]+"</td><td class=\"num\">"+fmt(c[1])+"</td><td class=\"num\">"+pctStr(c[1]/total25)+"</td></tr>";
+  });
+  tb.innerHTML = html;
+  document.getElementById("doli-total").textContent = fmt(total25);
+
+  /* Кольцевая диаграмма: топ-10 + «Прочие» */
+  var top = CLIENTS.slice(0,TOP);
+  var other = total25 - top.reduce(function(s,c){return s+c[1];},0);
+  var segs = top.map(function(c,i){return {n:c[0],v:c[1],col:PALETTE[i]};});
+  segs.push({n:"Прочие ("+(CLIENTS.length-TOP)+" клиент.)",v:other,col:PALETTE[TOP]});
+
+  var R=70,C=2*Math.PI,acc=0,svg='<svg viewBox="0 0 180 180" width="300" role="img" aria-label="Кольцевая диаграмма долей клиентов">';
+  svg += '<circle cx="90" cy="90" r="'+R+'" fill="none" stroke="#e8eef7" stroke-width="26"/>';
+  segs.forEach(function(s){
+    var frac=s.v/total25, dash=(frac*C).toFixed(2), off=(C/4 - acc*C).toFixed(2);
+    svg += '<circle cx="90" cy="90" r="'+R+'" fill="none" stroke="'+s.col+'" stroke-width="26" stroke-dasharray="'+dash+' '+(C-dash).toFixed(2)+'" stroke-dashoffset="'+off+'"><title>'+s.n+': '+pctStr(frac)+'</title></circle>';
+    acc += frac;
+  });
+  svg += '<text x="90" y="86" text-anchor="middle" font-size="11" fill="#5d6675">Итого</text>';
+  svg += '<text x="90" y="102" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1d2433">'+fmtShort(total25)+' ₽</text></svg>';
+  document.getElementById("donut").innerHTML = svg;
+
+  var lg = "";
+  segs.forEach(function(s){
+    lg += '<span><i style="background:'+s.col+'"></i>'+s.n+' — '+pctStr(s.v/total25)+'</span>';
+  });
+  document.getElementById("donut-legend").innerHTML = lg;
+
+  /* Горизонтальные бары по всем клиентам */
+  var bh = "";
+  CLIENTS.forEach(function(c,i){
+    bh += '<div class="bar-row"><span title="'+c[0]+'">'+c[0]+'</span><span class="bar-track"><span class="bar-fill" style="width:'+(c[1]/max25*100).toFixed(2)+'%;background:'+PALETTE[i<10?i:10]+'"></span></span><span class="num">'+fmt(c[1])+'</span></div>';
+  });
+  document.getElementById("bars").innerHTML = bh;
+}
+
+/* ===== Вкладка «План Ноябрь 2026» ===== */
+function loadFact(){
+  try{
+    var raw = localStorage.getItem(LS_KEY);
+    return raw ? JSON.parse(raw) : {};
+  }catch(e){ return {}; }
+}
+function saveFact(obj){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(obj)); }catch(e){}
+}
+var factStore = loadFact();
+
+function buildPlan(){
+  var tb = document.querySelector("#t-plan tbody");
+  var html = "";
+  CLIENTS.forEach(function(c,i){
+    var key = String(i);
+    var f26 = factStore[key] || "";
+    html += "<tr data-i=\""+i+"\" data-name=\""+c[0].toLowerCase()+"\">"
+      + "<td>"+(i+1)+"</td><td>"+c[0]+"</td>"
+      + "<td class=\"num\">"+fmt(c[1])+"</td>"
+      + "<td class=\"num\">"+fmt(c[1]*GROWTH)+"</td>"
+      + "<td class=\"num\"><input class=\"fact\" type=\"text\" inputmode=\"decimal\" value=\""+f26+"\" aria-label=\"Факт 11.2026 — "+c[0]+"\" data-i=\""+i+"\"></td>"
+      + "<td class=\"num pct\" id=\"exec-"+i+"\"></td>"
+      + "<td class=\"num\" id=\"dev-"+i+"\"></td></tr>";
+  });
+  tb.innerHTML = html;
+  recalcAll();
+}
+
+function parseNum(s){
+  if(s===null||s===undefined||String(s).trim()==="") return null;
+  var v = parseFloat(String(s).replace(/\s/g,"").replace(",","."));
+  return isNaN(v) ? null : v;
+}
+
+function recalcRow(i){
+  var f26 = parseNum(document.querySelector('input.fact[data-i="'+i+'"]').value);
+  var plan = CLIENTS[i][1]*GROWTH;
+  var exec = document.getElementById("exec-"+i);
+  var dev = document.getElementById("dev-"+i);
+  if(f26===null){ exec.textContent=""; dev.textContent=""; return null; }
+  exec.textContent = pctStr(f26/plan);
+  dev.textContent = (f26-plan>0?"+":"")+fmt(f26-plan);
+  return f26;
+}
+
+function recalcAll(){
+  var sum=0, has=false;
+  CLIENTS.forEach(function(c,i){
+    var v = recalcRow(i);
+    if(v!==null){ sum+=v; has=true; }
+  });
+  document.getElementById("p-f25").textContent = fmt(total25);
+  document.getElementById("p-plan").textContent = fmt(total25*GROWTH);
+  document.getElementById("p-f26").textContent = has ? fmt(sum) : "";
+  document.getElementById("p-exec").textContent = has ? pctStr(sum/(total25*GROWTH)) : "";
+  document.getElementById("p-dev").textContent = has ? (sum-total25*GROWTH>0?"+":"")+fmt(sum-total25*GROWTH) : "";
+}
+
+function bindEvents(){
+  document.querySelector("#t-plan").addEventListener("input", function(e){
+    var el = e.target;
+    if(!el.classList.contains("fact")) return;
+    var i = el.getAttribute("data-i");
+    factStore[i] = el.value;
+    saveFact(factStore);
+    recalcRow(Number(i));
+    /* пересчёт итога без полного ререндера */
+    var sum=0, has=false;
+    CLIENTS.forEach(function(c,k){
+      var v = parseNum(document.querySelector('input.fact[data-i="'+k+'"]').value);
+      if(v!==null){ sum+=v; has=true; }
+    });
+    document.getElementById("p-f26").textContent = has ? fmt(sum) : "";
+    document.getElementById("p-exec").textContent = has ? pctStr(sum/(total25*GROWTH)) : "";
+    document.getElementById("p-dev").textContent = has ? (sum-total25*GROWTH>0?"+":"")+fmt(sum-total25*GROWTH) : "";
+  });
+  document.getElementById("plan-search").addEventListener("input", function(e){
+    var q = e.target.value.trim().toLowerCase();
+    document.querySelectorAll("#t-plan tbody tr").forEach(function(tr){
+      tr.style.display = (!q || tr.getAttribute("data-name").indexOf(q)>=0) ? "" : "none";
+    });
+  });
+}
+
+buildDoli();
+buildPlan();
+bindEvents();
+</script>
+</body>
+</html>
