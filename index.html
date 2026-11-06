@@ -66,7 +66,7 @@
 <header>
   <div class="wrap">
     <h1>Планирование продаж — ноябрь 2026</h1>
-    <p>Менеджер: Щудро М.А. · База: факт ноября 2025 (выгрузка 1С, 01.11–30.11.2025) · План = факт × 1,3 · Факт 11.2026 на 03.11.2026</p>
+    <p>Менеджер: Щудро М.А. · База: факт ноября 2025 (выгрузка 1С, 01.11–30.11.2025) · План = факт × 1,3 · Факт 11.2026 на 06.11.2026</p>
   </div>
 </header>
 
@@ -114,18 +114,19 @@
   <section id="tab-plan" hidden aria-labelledby="btn-plan">
     <div class="panel">
       <h2>План и факт по клиентам</h2>
-      <p class="note">Правила обновления: факт 11.2026 вносится из ежедневной рассылки «факт продаж» (данные на 03.11.2026). Новые клиенты добавляются без факта 2025 и без плана — только факт. Клиенты «Демонстрация» и «Розничный» не вносятся. Суммы в колонке «Факт 11.2026» можно править вручную — значения сохраняются в браузере (localStorage).</p>
+      <p class="note">Правила обновления: факт 11.2026 вносится из ежедневной рассылки «факт продаж» (данные на 06.11.2026). Новые клиенты добавляются без факта 2025 и без плана — только факт. Клиенты «Демонстрация» и «Розничный» не вносятся. Суммы в колонке «Факт 11.2026» можно править вручную — значения сохраняются в браузере (localStorage). Колонка «Факт Новотех» — отгрузки Новотех (вносятся вручную), учитываются в общем факте, % выполнения и круге «Выполнено».</p>
       <div class="search"><input type="search" id="plan-search" placeholder="Поиск по клиенту…" aria-label="Поиск по клиенту"></div>
       <table id="t-plan">
         <thead><tr>
           <th scope="col">№</th><th scope="col">Клиент</th><th scope="col" class="num">Факт 11.2025, ₽</th>
           <th scope="col" class="num">План 11.2026 (+30%), ₽</th><th scope="col" class="num">Факт 11.2026, ₽</th>
+          <th scope="col" class="num">Факт Новотех, ₽</th>
           <th scope="col" class="num">% выполнения</th><th scope="col" class="num">Отклонение, ₽</th>
         </tr></thead>
         <tbody></tbody>
         <tfoot><tr>
           <td></td><td>ИТОГО</td><td class="num" id="p-f25"></td><td class="num" id="p-plan"></td>
-          <td class="num" id="p-f26"></td><td class="num pct" id="p-exec"></td><td class="num" id="p-dev"></td>
+          <td class="num" id="p-f26"></td><td class="num" id="p-nt"></td><td class="num pct" id="p-exec"></td><td class="num" id="p-dev"></td>
         </tr></tfoot>
       </table>
     </div>
@@ -134,7 +135,7 @@
 
 <footer>
   <div class="wrap">
-    Источник данных: выгрузка 1С «Валовая прибыль предприятия», период 01.11.2025–30.11.2025, отбор «Подразделение в группе из списка "Калининград"», основной менеджер — Щудро М.А. В базу включены 41 контрагент менеджера; клиенты других менеджеров выгрузки не включены. Факт 11.2026 — из ежедневной рассылки «факт продаж» (на 03.11.2026). Новые клиенты добавляются в план-таблицу без базы и плана; позиции «Демонстрация» и «Розничный покупатель» исключаются.
+    Источник данных: выгрузка 1С «Валовая прибыль предприятия», период 01.11.2025–30.11.2025, отбор «Подразделение в группе из списка "Калининград"», основной менеджер — Щудро М.А. В базу включены 41 контрагент менеджера; клиенты других менеджеров выгрузки не включены. Факт 11.2026 — из ежедневной рассылки «факт продаж» (на 06.11.2026). «Факт Новотех» — отгрузки Новотех (вносятся вручную), учитываются в общем факте и % выполнения. Новые клиенты добавляются в план-таблицу без базы и плана; позиции «Демонстрация» и «Розничный покупатель» исключаются.
   </div>
 </footer>
 
@@ -142,10 +143,10 @@
 "use strict";
 /* ===== Данные: факт ноября 2025, менеджер Щудро (выгрузка 1С) ===== */
 var CLIENTS = [
- ["ООО «Клинкербуд»",1938081.80,0],
+ ["ООО «Клинкербуд»",1938081.80,0,106210.57],
  ["ИП Вальков Александр Николаевич",958149.07,10515.18],
- ["ООО «Бауцентр Рус»",864938.06,0],
- ["ООО «ПрофСтайл»",655241.07,0],
+ ["ООО «Бауцентр Рус»",864938.06,62297.08],
+ ["ООО «ПрофСтайл»",655241.07,154314.32,849203.45],
  ["ООО «ИД Строй»",402716.12,0],
  ["ИП Голощапов Евгений Иванович",368685.13,0],
  ["ИП Козлова Надежда Владимировна",248237.67,0],
@@ -153,11 +154,11 @@ var CLIENTS = [
  ["ИП Высоцкий Алексей Сергеевич",124495.36,0],
  ["ООО «АгроРегион»",95864.63,0],
  ["ООО «Новые окна»",74315.44,0],
- ["ИП Белавин Роман Геннадьевич",57849.40,0],
+ ["ИП Белавин Роман Геннадьевич",57849.40,11736.56],
  ["ИП Азарян Лусине Ромаевна",56479.04,0],
- ["ИП Кузнецов Леонид Евгеньевич",55834.91,0],
+ ["ИП Кузнецов Леонид Евгеньевич",55834.91,13220.31],
  ["ИП Афонский Николай Витальевич",55529.92,0],
- ["ИП Светлейцих Игорь Владимирович",52245.33,0],
+ ["ИП Светлейцих Игорь Владимирович",52245.33,64328.60],
  ["ИП Вайткене Юлия Юрьевна",45113.19,7001.37],
  ["ООО «КАУФ МАРКЕТ»",43858.62,15551.06],
  ["ООО «Техэлектроцентр»",43243.69,0],
@@ -176,18 +177,20 @@ var CLIENTS = [
  ["ИП Баловнева Татьяна Анатольевна",17044.87,0],
  ["ИП Попов Алексей Владимирович",16228.20,0],
  ["ИП Фомина Снежана Николаевна",14207.56,0],
- ["ИП Готовка Виталий Рышардович",13910.74,0],
+ ["ИП Готовка Виталий Рышардович",13910.74,11643.91],
  ["ИП Бурганшин Егор Ильдусович",13666.24,0],
  ["ИП Гущин Олег Васильевич",13170.53,0],
  ["ООО «Маяк Плюс»",9025.66,0],
  ["ИП Писаренко Александр Юрьевич",7472.92,0],
  ["ИП Трошин Андрей Владимирович",4896.78,0],
  ["ООО «ФЭКТОРИ»",3269.68,0],
- ["ИП Клюев Артем Андреевич",null,92675.85]
+ ["ИП Клюев Артем Андреевич",null,184942.21],
+ ["ИП Варганов Сергей Юрьевич",null,123825.28],
+ ["ИП Танашова Наталья Анатольевна",null,34214.92]
 ];
 var GROWTH = 1.3, TOP = 10;
 var LS_KEY = "plan_nov2026_fact_v1";
-var FACT_DATE = "03.11.2026";
+var FACT_DATE = "06.11.2026";
 
 var PALETTE = ["#1f4e79","#2e75b6","#5b9bd5","#8faadc","#c9a227","#a8734b","#4d8b6f","#7c5aa0","#c05b5b","#5f7d95","#a0a8b4"];
 var total25 = CLIENTS.reduce(function(s,c){return s+c[1];},0);
@@ -252,12 +255,14 @@ function buildDoli(){
   renderDonut("donut-plan","donut-plan-legend",psegs,planTotal,"План",fmtShort(planTotal)+" ₽","+30% к базе");
 
   /* Кольцевая диаграмма «Факт»: доли факта 11.2026 + выполнение плана */
-  var fAll = CLIENTS.filter(function(c){return c[2]>0;}).sort(function(a,b){return b[2]-a[2];});
+  var fAll = CLIENTS.filter(function(c){return (c[2]||0)+(c[3]||0)>0;})
+    .map(function(c){return [c[0],(c[2]||0)+(c[3]||0)];})
+    .sort(function(a,b){return b[1]-a[1];});
   var fTop = fAll.slice(0,TOP), fRest = fAll.slice(TOP);
-  var total26 = fAll.reduce(function(s,c){return s+c[2];},0);
-  var fsegs = fTop.map(function(c,i){return {n:c[0],v:c[2],col:PALETTE[i]};});
+  var total26 = fAll.reduce(function(s,c){return s+c[1];},0);
+  var fsegs = fTop.map(function(c,i){return {n:c[0],v:c[1],col:PALETTE[i]};});
   if(fRest.length>0){
-    fsegs.push({n:"Прочие ("+fRest.length+" клиент.)",v:fRest.reduce(function(s,c){return s+c[2];},0),col:PALETTE[TOP]});
+    fsegs.push({n:"Прочие ("+fRest.length+" клиент.)",v:fRest.reduce(function(s,c){return s+c[1];},0),col:PALETTE[TOP]});
   }
   renderDonut("donut-fact","donut-fact-legend",fsegs,total26,"Выполнено",fmtShort(total26)+" ₽",pctStr(total26/planTotal)+" плана");
   document.getElementById("exec-title").textContent = pctStr(total26/planTotal)+" плана";
@@ -293,6 +298,7 @@ function buildPlan(){
       + "<td class=\"num\">"+(c[1]===null?"—":fmt(c[1]))+"</td>"
       + "<td class=\"num\">"+(c[1]===null?"—":fmt(c[1]*GROWTH))+"</td>"
       + "<td class=\"num\"><input class=\"fact\" type=\"text\" inputmode=\"decimal\" value=\""+f26+"\" aria-label=\"Факт 11.2026 — "+c[0]+"\" data-i=\""+i+"\"></td>"
+      + "<td class=\"num\">"+(c[3]==null?"—":fmt(c[3]))+"</td>"
       + "<td class=\"num pct\" id=\"exec-"+i+"\"></td>"
       + "<td class=\"num\" id=\"dev-"+i+"\"></td></tr>";
   });
@@ -308,18 +314,27 @@ function parseNum(s){
 
 function recalcRow(i){
   var f26 = parseNum(document.querySelector('input.fact[data-i="'+i+'"]').value);
+  var nt = CLIENTS[i][3]||0;
   var exec = document.getElementById("exec-"+i);
   var dev = document.getElementById("dev-"+i);
   if(CLIENTS[i][1]===null){ /* новый клиент: план не задаётся, показываем только факт */
     exec.textContent = (f26===null)?"":"—";
     dev.textContent = (f26===null)?"":"—";
-    return f26;
+    return (f26===null)?null:(f26+nt);
   }
   var plan = CLIENTS[i][1]*GROWTH;
-  if(f26===null){ exec.textContent=""; dev.textContent=""; return null; }
-  exec.textContent = pctStr(f26/plan);
-  dev.textContent = (f26-plan>0?"+":"")+fmt(f26-plan);
-  return f26;
+  if(f26===null){
+    if(nt>0){
+      exec.textContent = pctStr(nt/plan);
+      dev.textContent = (nt-plan>0?"+":"")+fmt(nt-plan);
+      return nt;
+    }
+    exec.textContent=""; dev.textContent=""; return null;
+  }
+  var fTotal = f26+nt;
+  exec.textContent = pctStr(fTotal/plan);
+  dev.textContent = (fTotal-plan>0?"+":"")+fmt(fTotal-plan);
+  return fTotal;
 }
 
 function recalcAll(){
@@ -328,8 +343,10 @@ function recalcAll(){
     var v = recalcRow(i);
     if(v!==null){ sum+=v; has=true; }
   });
+  var ntTotal = CLIENTS.reduce(function(s,c){return s+(c[3]||0);},0);
   document.getElementById("p-f25").textContent = fmt(total25);
   document.getElementById("p-plan").textContent = fmt(total25*GROWTH);
+  document.getElementById("p-nt").textContent = ntTotal>0 ? fmt(ntTotal) : "";
   document.getElementById("p-f26").textContent = has ? fmt(sum) : "";
   document.getElementById("p-exec").textContent = has ? pctStr(sum/(total25*GROWTH)) : "";
   document.getElementById("p-dev").textContent = has ? (sum-total25*GROWTH>0?"+":"")+fmt(sum-total25*GROWTH) : "";
@@ -342,16 +359,7 @@ function bindEvents(){
     var i = el.getAttribute("data-i");
     factStore[i] = el.value;
     saveFact(factStore);
-    recalcRow(Number(i));
-    /* пересчёт итога без полного ререндера */
-    var sum=0, has=false;
-    CLIENTS.forEach(function(c,k){
-      var v = parseNum(document.querySelector('input.fact[data-i="'+k+'"]').value);
-      if(v!==null){ sum+=v; has=true; }
-    });
-    document.getElementById("p-f26").textContent = has ? fmt(sum) : "";
-    document.getElementById("p-exec").textContent = has ? pctStr(sum/(total25*GROWTH)) : "";
-    document.getElementById("p-dev").textContent = has ? (sum-total25*GROWTH>0?"+":"")+fmt(sum-total25*GROWTH) : "";
+    recalcAll();
   });
   document.getElementById("plan-search").addEventListener("input", function(e){
     var q = e.target.value.trim().toLowerCase();
