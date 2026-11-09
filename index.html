@@ -154,12 +154,12 @@
       <div id="bars"></div>
     </div>
     <div class="panel">
-      <h2>Все клиенты — выручка и доля</h2>
+      <h2>Все клиенты — доля в выручке</h2>
       <div class="note">Доля = выручка клиента / итог всей базы менеджера.</div>
       <div class="table-wrap"><table id="t-doli">
-        <thead><tr><th scope="col">Клиент</th><th scope="col" class="num">Выручка, ₽</th><th scope="col" class="num">Доля, %</th></tr></thead>
+        <thead><tr><th scope="col">Клиент</th><th scope="col" class="num">Доля, %</th></tr></thead>
         <tbody></tbody>
-        <tfoot><tr><td>ИТОГО</td><td class="num" id="doli-total"></td><td class="num" id="doli-total-pct">100,00%</td></tr></tfoot>
+        <tfoot><tr><td>ИТОГО</td><td class="num" id="doli-total-pct">100,00%</td></tr></tfoot>
       </table></div>
     </div>
   </section>
@@ -440,10 +440,9 @@ function buildDoli(){
   var html = "";
   var base = CLIENTS.filter(function(c){return c[1]!==null;});
   base.forEach(function(c){
-    html += "<tr"+(isVIP(c[0])?" class=\"vip-row\"":"")+"><td>"+c[0]+(isVIP(c[0])?" <span class=\"vip-badge\">VIP</span>":"")+"</td><td class=\"num\">"+fmt(c[1])+"</td><td class=\"num\">"+pctStr(c[1]/total25)+"</td></tr>";
+    html += "<tr"+(isVIP(c[0])?" class=\"vip-row\"":"")+"><td>"+c[0]+(isVIP(c[0])?" <span class=\"vip-badge\">VIP</span>":"")+"</td><td class=\"num\">"+pctStr(c[1]/total25)+"</td></tr>";
   });
   tb.innerHTML = html;
-  document.getElementById("doli-total").textContent = fmt(total25);
 
   /* Кольцевая диаграмма «Итого»: база 2025, топ-10 + «Прочие» */
   var top = base.slice(0,TOP);
