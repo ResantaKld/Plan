@@ -23,21 +23,43 @@ jobs:
             echo "::error::Переменная DISK_URL не задана. Настройте: Settings -> Secrets and variables -> Actions -> Variables -> New repository variable, Name = DISK_URL, Value = публичная ссылка на index.html (https://yadi.sk/d/GQn5fpGb06Cjcw)"
             exit 1
           fi
-          HREF=$(curl -sL --fail -G "https://cloud-api.yandex.net/v1/disk/public/resources/download" --data-urlencode "public_key=$DISK_URL" | python3 -c "import sys,json;print(json.load(sys.stdin)['href'])")
+
+          # 1) Получаем прямую ссылку через официальный API Яндекса (короткая ссылка напрямую отдаёт роботам страницу антибота)
+          HREF=""
+          for i in 1 2 3 4 5; do
+            CODE=$(curl -sL -G -o api.json -w "%{http_code}" "https://cloud-api.yandex.net/v1/disk/public/resources/download" --data-urlencode "public_key=$DISK_URL" || echo "000")
+            if [ "$CODE" = "200" ]; then
+              HREF=$(python3 -c "import json;print(json.load(open('api.json')).get('href',''))" 2>/dev/null || echo "")
+              if [ -n "$HREF" ]; then
+                echo "Прямая ссылка получена (попытка $i)"
+                break
+              fi
+              echo "API вернул 200, но без href. Ответ: $(head -c 200 api.json)"
+            else
+              BODY=$(head -c 200 api.json 2>/dev/null || echo "")
+              echo "API попытка $i: HTTP $CODE ${BODY}"
+            fi
+            echo "Ждём $((i*15)) секунд..."
+            sleep $((i*15))
+          done
           if [ -z "$HREF" ]; then
-            echo "::error::Не удалось получить прямую ссылку — проверьте DISK_URL"
+            echo "::error::Не удалось получить прямую ссылку с Диска после 5 попыток. Если ошибка повторяется каждый день, пришлите этот лог."
             exit 1
           fi
+
+          # 2) Скачиваем файл (с повторами)
           OK=0
           for i in 1 2 3; do
             if curl -sL --fail -o index.html "$HREF"; then OK=1; break; fi
-            echo "Попытка $i не удалась, ждём 20 секунд..."
+            echo "Скачивание: попытка $i не удалась, ждём 20 секунд..."
             sleep 20
           done
           if [ "$OK" != "1" ]; then
             echo "::error::Скачивание не удалось после 3 попыток"
             exit 1
           fi
+
+          # 3) Проверяем, что скачан именно дашборд
           SIZE=$(wc -c < index.html)
           if [ "$SIZE" -lt 100000 ] || ! grep -q "var CLIENTS" index.html; then
             echo "::error::Скачан не дашборд ($SIZE байт) — проверьте DISK_URL"
