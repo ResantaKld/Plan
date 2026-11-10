@@ -1,9 +1,9 @@
-name: Update dashboard from Yandex Disk
+name: Update dashboard
 
 on:
   schedule:
-    - cron: '0 8 * * *'   # 08:00 UTC = 10:00 по Калининграду
-  workflow_dispatch:      # ручной запуск: Actions → Update dashboard from Yandex Disk → Run workflow
+    - cron: "0 8 * * *"   # ежедневно 08:00 UTC = 10:00 по Калининграду
+  workflow_dispatch:       # ручной запуск: Actions -> Update dashboard -> Run workflow
 
 permissions:
   contents: write
@@ -12,29 +12,47 @@ jobs:
   update:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Download index.html from Yandex Disk
-        shell: bash
-        run: |
-          URL="${DISK_URL:-https://yadi.sk/d/GQn5fpGb06Cjcw}"
-          ENCODED=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1], safe=''))" "$URL")
-          HREF=$(curl -sf "https://cloud-api.yandex.net/v1/disk/public/resources/download?public_key=$ENCODED" | python3 -c "import json,sys; print(json.load(sys.stdin)['href'])")
-          curl -sfL -o index.html "$HREF"
-          echo "Downloaded $(wc -c < index.html) bytes from $URL"
+      - name: Fetch dashboard from Yandex Disk
         env:
           DISK_URL: ${{ vars.DISK_URL }}
+        run: |
+          set -e
+          if [ -z "$DISK_URL" ]; then
+            echo "::error::Переменная DISK_URL не задана. Настройте: Settings -> Secrets and variables -> Actions -> Variables -> New repository variable, Name = DISK_URL, Value = публичная ссылка на index.html (https://yadi.sk/d/GQn5fpGb06Cjcw)"
+            exit 1
+          fi
+          HREF=$(curl -sL --fail -G "https://cloud-api.yandex.net/v1/disk/public/resources/download" --data-urlencode "public_key=$DISK_URL" | python3 -c "import sys,json;print(json.load(sys.stdin)['href'])")
+          if [ -z "$HREF" ]; then
+            echo "::error::Не удалось получить прямую ссылку — проверьте DISK_URL"
+            exit 1
+          fi
+          OK=0
+          for i in 1 2 3; do
+            if curl -sL --fail -o index.html "$HREF"; then OK=1; break; fi
+            echo "Попытка $i не удалась, ждём 20 секунд..."
+            sleep 20
+          done
+          if [ "$OK" != "1" ]; then
+            echo "::error::Скачивание не удалось после 3 попыток"
+            exit 1
+          fi
+          SIZE=$(wc -c < index.html)
+          if [ "$SIZE" -lt 100000 ] || ! grep -q "var CLIENTS" index.html; then
+            echo "::error::Скачан не дашборд ($SIZE байт) — проверьте DISK_URL"
+            exit 1
+          fi
+          echo "Скачан дашборд: $SIZE байт"
 
       - name: Commit if changed
-        shell: bash
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html
-          if git diff --cached --quiet; then
-            echo "No changes — nothing to commit"
+          if git diff --quiet -- index.html; then
+            echo "Без изменений — коммит не нужен"
           else
-            git commit -m "Автообновление дашборда с Яндекс Диска ($(date -u +%Y-%m-%d))"
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add index.html
+            git commit -m "Обновление дашборда $(TZ=Europe/Kaliningrad date +'%d.%m.%Y')"
             git push
           fi
