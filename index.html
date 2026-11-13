@@ -69,6 +69,10 @@
   .vip-row{background:#fff8d6}
   .vip-badge{display:inline-block;padding:1px 7px;border-radius:20px;font-size:11px;font-weight:700;background:#f5d33f;color:#6b5200;vertical-align:1px;white-space:nowrap}
   .lost-card.vip>summary{background:#fff8d6}
+.lost-card.returned{border-color:#4d8b6f}
+.lost-card.returned>summary{background:#e8f6e8}
+.lost-card.returned.vip>summary{background:#e8f6e8}
+.ret-badge{display:inline-block;padding:1px 7px;border-radius:20px;font-size:11px;font-weight:700;background:#3d7d4f;color:#fff;vertical-align:1px;white-space:nowrap}
   .season-bar{padding:8px 14px;background:linear-gradient(90deg,#e8f3ff,#d6e9ff);border-top:1px solid #bcd6f2;color:#1e4e79;font-size:13px;line-height:1.5}
   .season-bar .tlabel{font-weight:700;color:#2e75b6}
   .lost-card{border:1px solid var(--line);border-radius:var(--radius);margin-bottom:var(--sp-2);background:var(--surface);overflow:hidden}
@@ -349,12 +353,53 @@ function isVIP(n){
   n = (n||"").toLowerCase();
   return VIP.some(function(k){ return n.indexOf(k)>=0; });
 }
+
+// Сопоставление карточки "Потерянных" с клиентами плана по значимым словам (фамилия/название).
+// Возвращает индексы CLIENTS, у которых есть совпадение.
+function lostClientMatches(n){
+  var words = (n||"").toLowerCase().replace(/ё/g,"е").replace(/[«»""]+/g," ")
+    .replace(/[.,;:/()\u00B7]/g," ").split(/\s+/)
+    .filter(function(w){ return w.length>=4 && w!=="товар"; });
+  var out = [];
+  for(var i=0;i<CLIENTS.length;i++){
+    var cn=(CLIENTS[i][0]||"").toLowerCase().replace(/ё/g,"е").replace(/[«»""]+/g," ");
+    for(var j=0;j<words.length;j++){
+      if(cn.indexOf(words[j])>=0){ out.push(i); break; }
+    }
+  }
+  return out;
+}
+// Для всех карточек LOST: есть ли отгрузка в текущем месяце и как её показать.
+function lostShipInfo(){
+  var res = LOST.map(function(cl){ return {cl:cl, hits:lostClientMatches(cl.n)}; });
+  var cnt = {};
+  res.forEach(function(r){ r.hits.forEach(function(h){ cnt[h]=(cnt[h]||0)+1; }); });
+  res.forEach(function(r, idx){
+    var mpp=0, nt=0;
+    r.hits.forEach(function(h){
+      mpp += (CLIENTS[h][2]||0);
+      nt  += ((CLIENTS[h].length>3 && CLIENTS[h][3]!=null)?CLIENTS[h][3]:0);
+    });
+    r.ship  = (mpp+nt)>0 ? {mpp:mpp, nt:nt, sum:mpp+nt} : null;
+    r.multi = r.hits.length ? cnt[r.hits[0]] : 0;
+    r.ncli  = r.hits.length;
+  });
+  return res;
+}
 function buildLost(){
   var root = document.getElementById("lost-cards");
   var html = "";
-  LOST.forEach(function(cl){
-    html += '<details class="lost-card'+(isVIP(cl.n)?' vip':'')+'">'
-      + '<summary><span>'+cl.n+(isVIP(cl.n)?' <span class="vip-badge">VIP-клиент</span>':'')+'</span><span class="lost-sum">'+fmt(cl.prev)+' ₽<span class="lost-sub">продажи прошлый период (дек 2025 – авг 2026)</span></span></summary>'
+  var LSI = lostShipInfo();
+  LOST.forEach(function(cl, li){
+    var sh = LSI[li].ship;
+    var badge = "";
+    if(sh){
+      var sum = sh.mpp>0 ? sh.mpp : sh.sum;
+      var suf = (sh.mpp===0?' (Новотех)':'') + (LSI[li].multi>1?' (суммарно по '+LSI[li].multi+' ТТ)':'') + (LSI[li].ncli>1?' ('+LSI[li].ncli+' клиента)':'');
+      badge = ' <span class="ret-badge">отгружен: '+fmt(sum)+' ₽ за ноябрь'+suf+'</span>';
+    }
+    html += '<details class="lost-card'+(sh?' returned':'')+(isVIP(cl.n)?' vip':'')+'">'
+      + '<summary><span>'+cl.n+badge+(isVIP(cl.n)?' <span class="vip-badge">VIP-клиент</span>':'')+'</span><span class="lost-sum">'+fmt(cl.prev)+' ₽<span class="lost-sub">продажи прошлый период (дек 2025 – авг 2026)</span></span></summary>'
       + '<div class="lost-meta"><span>СКЮ в полке: <b>'+cl.shelf+'</b></span>'
       + '<span>Позиций с продажами: <b>'+cl.sku+'</b></span>'
       + '<span>Посещения сент.–ноябрь: <b>'+(cl.visits?cl.visits:'нет')+'</b></span>'
