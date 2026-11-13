@@ -357,17 +357,28 @@ function isVIP(n){
 // Сопоставление карточки "Потерянных" с клиентами плана по значимым словам (фамилия/название).
 // Возвращает индексы CLIENTS, у которых есть совпадение.
 function lostClientMatches(n){
-  var words = (n||"").toLowerCase().replace(/ё/g,"е").replace(/[«»""]+/g," ")
-    .replace(/[.,;:/()\u00B7]/g," ").split(/\s+/)
-    .filter(function(w){ return w.length>=4 && w!=="товар"; });
+  var parts = (n||"").split(/[/\u00B7]/);
   var out = [];
-  for(var i=0;i<CLIENTS.length;i++){
-    var cn=(CLIENTS[i][0]||"").toLowerCase().replace(/ё/g,"е").replace(/[«»""]+/g," ");
-    for(var j=0;j<words.length;j++){
-      if(cn.indexOf(words[j])>=0){ out.push(i); break; }
+  parts.forEach(function(part){
+    var toks = part.toLowerCase().replace(/ё/g,"е").replace(/[«»"\u0022"]+/g," ")
+      .replace(/[.,;:()\u00B7]/g," ").split(/\s+/).filter(Boolean);
+    while(toks.length && ["ип","ооо","тт","ао","зао","оао"].indexOf(toks[0])>=0) toks.shift();
+    if(!toks.length || toks[0].length<2) return;
+    var fam = toks[0];
+    var ini = toks.slice(1).filter(function(w){ return w.length===1; }).join("");
+    for(var i=0;i<CLIENTS.length;i++){
+      var cw = (CLIENTS[i][0]||"").toLowerCase().replace(/ё/g,"е").replace(/[«»"\u0022"]+/g," ")
+        .replace(/[.,;:()\u00B7]/g," ").split(/\s+/).filter(Boolean);
+      var words = cw.filter(function(w){ return ["ип","ооо","тт","ао","зао","оао"].indexOf(w)<0; });
+      if(!words.length || words[0]!==fam) continue;
+      if(ini && words.length>=3){
+        var ci = (words[1][0]+words[2][0]);
+        if(ini!==ci) continue;
+      }
+      out.push(i); break;
     }
-  }
-  return out;
+  });
+  return out.filter(function(v, idx){ return out.indexOf(v)===idx; });
 }
 // Для всех карточек LOST: есть ли отгрузка в текущем месяце и как её показать.
 function lostShipInfo(){
